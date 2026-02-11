@@ -49,18 +49,18 @@ int main(void)
     printf("UART stdio klar.\n");
     printf("Skriv et tal og tryk Enter.\n");
 
-    if((led2_timer_id = timer_create_sw(led2_callback, 100)) < 0)
-    {
-        printf("Fejl ved oprettelse af LED timer!\n");
-    }
+    // if((led2_timer_id = timer_create_sw(led2_callback, 100)) < 0)
+    // {
+    //     printf("Fejl ved oprettelse af LED timer!\n");
+    // }
 
-    if(timer_create_sw(start_stop_callback, 5000) < 0)
-    {
-        printf("Fejl ved oprettelse af LED timer!\n");
-    }
+    // if(timer_create_sw(start_stop_callback, 5000) < 0)
+    // {
+    //     printf("Fejl ved oprettelse af LED timer!\n");
+    // }
 
-    led_blink(3, 500); // Blink LED3 with 500ms periode
-    led_blink(4, 5000); // Blink LED4 with 5000ms periode
+    // led_blink(3, 500); // Blink LED3 with 500ms periode
+    // led_blink(4, 5000); // Blink LED4 with 5000ms periode
 
     sei(); // Enable global interrupts
 
