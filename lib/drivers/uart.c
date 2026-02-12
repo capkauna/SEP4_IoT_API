@@ -11,6 +11,7 @@
  *           no parity.
  *******************************************************************/
 #include "uart.h"
+#include "ringbuffer_static.h"
 #include <stddef.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -26,11 +27,9 @@ static inline uint16_t ubrr_from_baud(uint32_t baud)
     return (uint16_t)((F_CPU / (8UL * baud)) - 1UL);
 }
 
-uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback)
+uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ringbuffer_t rx_buffer)
 {
     uint16_t ubrr = ubrr_from_baud(baud);
-    // if (ubrr == 7)
-    //     ubrr = 8; // ugly hack because of rounding error..
 
     switch (uart_id)
     {
@@ -43,7 +42,11 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback)
         UCSR0B = (1 << RXEN0) | (1 << TXEN0);   // Enable RX + TX
         UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // 8N1
 
-        uart0_rx_callback = rx_callback;
+        if(NULL != rx_callback) 
+        {
+            UCSR0B |= (1 << RXCIE0);            // Enable RX Complete Interrupt
+            uart0_rx_callback = rx_callback;    // Store callback for use in ISR
+        }
         break;
     case 1:
         // Baudrate
@@ -134,4 +137,13 @@ uint8_t uart_read_byte_blocking(uart_id_t uart_id)
         return UDR3;
     }
     return 0;
+}
+
+ISR(USART0_RX_vect)
+{
+    if (uart0_rx_callback)
+    {
+        uint8_t byte = UDR0;
+        uart0_rx_callback(byte);
+    }
 }

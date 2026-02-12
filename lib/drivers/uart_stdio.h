@@ -7,12 +7,16 @@
  **********************************************/
 
 #pragma once
+#include "uart.h"
 #include <stdint.h>
 
-// Initialiser USART0 og bind stdin/stdout/stderr til den
-void uart_stdio_init(uint32_t baud);
+// Buffer size for incoming bytes on stdio (UART0).
+#define UART_STDIO_RX_BUFFER_SIZE 64
 
-// Valgfrit: direkte send/receive (kan bruges uden stdio)
+// Initialize USART0 and bind stdin/stdout/stderr to it
+uart_t uart_stdio_init(uint32_t baud);
+
+// Optional: direct send/receive (can be used without stdio)
 void uart0_write_byte(int8_t b);
 int8_t uart0_read_byte_blocking(void);
 
