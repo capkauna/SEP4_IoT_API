@@ -9,6 +9,8 @@
 #include "display.h"
 #include "timer.h"
 
+#include "uart.h"
+
 static int led2_timer_id = 0;
 
 void pir_callback(void)
@@ -70,37 +72,42 @@ int main(void)
 
     while (1)
     {
-        int x = 0;
+        // int x = 0;
 
-        printf("\n> ");
-        fflush(stdout); // typisk ikke nødvendigt, men ok
+        // printf("\n> ");
+        // fflush(stdout); // typisk ikke nødvendigt, men ok
 
         // scanf er blokkerende og venter på input
-        if (scanf("%d", &x) == 1) 
-        {
-            display_int(x);
-            printf("Du skrev: %d\n", x);
-            if((x>0) && (x<5))
+        // if (scanf("%d", &x) == 1) 
+        // {
+        //     display_int(x);
+        //     printf("Du skrev: %d\n", x);
+        //     if((x>0) && (x<5))
+        //     {
+        //         led_toggle((int8_t)x);
+        //     }
+        //     else
+        //     {
+        //         printf("Tallet skal være mellem 1 og 4 for at toggle en LED.\n");
+        //     }
+        // } 
+        // else 
+        // {
+        //     // Hvis scanf fejler (f.eks. bogstaver), ryd input-linjen
+        //     printf("Ugyldigt input. Prøv igen.\n");
+        //     int ch;
+        //     do 
+        //     { 
+        //         ch = getchar(); 
+        //         putchar(ch);
+        //     } while (ch != '\n' && ch != EOF);
+        // }
+        uint8_t ch;
+            ch = uart_read_byte(UART0_ID);
+            if(ch != 0) // Check if a byte was read
             {
-                led_toggle((int8_t)x);
-            }
-            else
-            {
-                printf("Tallet skal være mellem 1 og 4 for at toggle en LED.\n");
-            }
-        } 
-        else 
-        {
-            // Hvis scanf fejler (f.eks. bogstaver), ryd input-linjen
-            printf("Ugyldigt input. Prøv igen.\n");
-            int ch;
-            do 
-            { 
-                ch = getchar(); 
-                putchar(ch);
-            } while (ch != '\n' && ch != EOF);
-        }
-
+                putchar(ch); // Echo the received byte back to the terminal
+            }        
 
         _delay_ms(200);
     }

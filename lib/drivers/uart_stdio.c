@@ -9,6 +9,7 @@
 #include "ringbuffer_static.h"
 #include <avr/io.h>
 #include <stdio.h>
+/*DEBUG*/    #include "display.h"
 
 static int uart0_putchar(char c, FILE *stream);
 static int uart0_getchar(FILE *stream);
@@ -17,13 +18,15 @@ static int uart0_getchar(FILE *stream);
 static FILE uart0_stream;
 
 // Ring buffer for incoming bytes on UART0
-static ringbuffer_t uart0_rx_buffer;   // Pointer to buffer object
+static ringbuffer_t uart0_rx_buffer;   // Buffer object
 static uint8_t uart0_rx_storage[UART_STDIO_RX_BUFFER_SIZE];  // Backing storage for ring buffer
 
 void uart0_rx_callback(uint8_t byte)
 {
     // Push received byte into ring buffer.
     ringbuffer_push(&uart0_rx_buffer, &byte);
+
+/*DEBUG*/ display_int(ringbuffer_size(&uart0_rx_buffer));
 }
 
 uart_t uart_stdio_init(uint32_t baud)
@@ -35,7 +38,7 @@ uart_t uart_stdio_init(uint32_t baud)
         return UART_ERROR_INIT_FAILED; // Failed to initialize ringbuffer
     }
 
-    uart_t result = uart_init(UART0_ID, baud, uart0_rx_callback, uart0_rx_buffer);
+    uart_t result = uart_init(UART0_ID, baud, uart0_rx_callback, &uart0_rx_buffer);
     if (UART_OK == result)
     {
         // Bind stdio to UART
