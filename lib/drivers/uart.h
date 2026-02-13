@@ -16,7 +16,7 @@
   *******************************************************************/
 #pragma once
 #include <stdint.h>
-#include "ringbuffer_static.h"
+#include "ringbuffer.h"
 
 typedef enum {
     UART_OK = 0,
@@ -32,11 +32,13 @@ typedef enum {
     UART3_ID = 3
 } uart_id_t;
 
-typedef void (*rx_callback_t)(uint8_t byte);
+//typedef void (*rx_callback_t)(uint8_t byte);
 
 // Initialize UART with the specified baud rate (e.g., 9600, 115200).
 // Returns UART_OK on success, or negative error code on failure.
-uart_t uart_init(uart_id_t uart_id, uint32_t baud_rate, rx_callback_t rx_callback, ringbuffer_t *rx_buffer);
+//uart_t uart_init(uart_id_t uart_id, uint32_t baud_rate, rx_callback_t rx_callback, ringbuffer_t *rx_buffer);
+
+uart_t uart_init(uart_id_t uart_id, uint32_t baud_rate, uint8_t buffer_size); // buffer_size=0 for no interrupt/ringbuffer, otherwise creates ringbuffer of specified size and enables RX interrupt
 uart_t uart_write_bytes(const uint8_t* data, uint16_t length);
 uart_t uart_write_byte(uart_id_t uart_id, int8_t b);
 uint8_t uart_read_byte(uart_id_t uart_id);

@@ -11,19 +11,16 @@
  *           no parity.
  *******************************************************************/
 #include "uart.h"
-#include "ringbuffer_static.h"
+#include "ringbuffer.h"
 #include <stddef.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-static rx_callback_t uart0_rx_callback = NULL;
-static rx_callback_t uart1_rx_callback = NULL;
-static rx_callback_t uart2_rx_callback = NULL;
-static rx_callback_t uart3_rx_callback = NULL;
 static ringbuffer_t *uart0_rx_buffer = NULL;
-static ringbuffer_t *uart1_rx_buffer = NULL;
-static ringbuffer_t *uart2_rx_buffer = NULL;
-static ringbuffer_t *uart3_rx_buffer = NULL;
+// static ringbuffer_t *uart1_rx_buffer = NULL;
+// static ringbuffer_t *uart2_rx_buffer = NULL;
+// static ringbuffer_t *uart3_rx_buffer = NULL;
+
 
 static inline uint16_t ubrr_from_baud(uint32_t baud)
 {
@@ -31,7 +28,8 @@ static inline uint16_t ubrr_from_baud(uint32_t baud)
     return (uint16_t)((F_CPU / (8UL * baud)) - 1UL);
 }
 
-uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ringbuffer_t *rx_buffer)
+//uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ringbuffer_t *rx_buffer)
+uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
 {
     uint16_t ubrr = ubrr_from_baud(baud);
 
@@ -46,11 +44,13 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ri
         UCSR0B = (1 << RXEN0) | (1 << TXEN0);   // Enable RX + TX
         UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // 8N1
 
-        if(NULL != rx_callback) 
+        if(buffer_size > 0) 
         {
+            uart0_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
+            if (!uart0_rx_buffer) {
+                return UART_ERROR_INIT_FAILED;
+            }
             UCSR0B |= (1 << RXCIE0);            // Enable RX Complete Interrupt
-            uart0_rx_callback = rx_callback;    // Store callback for use in ISR
-            uart0_rx_buffer = rx_buffer;        // Store ring buffer for use in ISR
         }
         break;
     case 1:
@@ -62,7 +62,6 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ri
         UCSR1B = (1 << RXEN1) | (1 << TXEN1);   // Enable RX + TX
         UCSR1C = (1 << UCSZ11) | (1 << UCSZ10); // 8N1
         
-        uart1_rx_callback = rx_callback;
         break;
     case 2:
         // Baudrate
@@ -73,7 +72,6 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ri
         UCSR2B = (1 << RXEN2) | (1 << TXEN2);   // Enable RX + TX
         UCSR2C = (1 << UCSZ21) | (1 << UCSZ20); // 8N1
         
-        uart2_rx_callback = rx_callback;
         break;
     case 3:
         // Baudrate
@@ -84,7 +82,6 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ri
         UCSR3B = (1 << RXEN3) | (1 << TXEN3);   // Enable RX + TX
         UCSR3C = (1 << UCSZ31) | (1 << UCSZ30); // 8N1
         
-        uart3_rx_callback = rx_callback;
         break;
     default:
         return UART_ERROR_INIT_FAILED; // Invalid UART ID
@@ -168,9 +165,7 @@ uint8_t uart_read_byte(uart_id_t uart_id)
 
 ISR(USART0_RX_vect)
 {
-    if (uart0_rx_callback)
-    {
-        uint8_t byte = UDR0;
-        uart0_rx_callback(byte);
-    }
+    uint8_t byte = UDR0;
+    // Push received byte into ring buffer.
+    ringbuffer_push(uart0_rx_buffer, &byte);
 }
