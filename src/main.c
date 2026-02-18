@@ -46,6 +46,7 @@ int main(void)
     led_init();
     pir_init(pir_callback);
     display_init();
+
     // Initialize UART stdio at 115200 baud. Must be same on terminal.
     if(UART_OK != uart_stdio_init(115200))
     {
@@ -55,59 +56,53 @@ int main(void)
     printf("UART stdio klar.\n");
     printf("Skriv et tal og tryk Enter.\n");
 
-    // if((led2_timer_id = timer_create_sw(led2_callback, 100)) < 0)
-    // {
-    //     printf("Fejl ved oprettelse af LED timer!\n");
-    // }
+    if((led2_timer_id = timer_create_sw(led2_callback, 100)) < 0)
+    {
+        printf("Fejl ved oprettelse af LED timer!\n");
+    }
 
-    // if(timer_create_sw(start_stop_callback, 5000) < 0)
-    // {
-    //     printf("Fejl ved oprettelse af LED timer!\n");
-    // }
+    if(timer_create_sw(start_stop_callback, 5000) < 0)
+    {
+        printf("Fejl ved oprettelse af LED timer!\n");
+    }
 
-    // led_blink(3, 500); // Blink LED3 with 500ms periode
-    // led_blink(4, 5000); // Blink LED4 with 5000ms periode
+    led_blink(3, 500); // Blink LED3 with 500ms periode
+    led_blink(4, 5000); // Blink LED4 with 5000ms periode
 
     sei(); // Enable global interrupts
 
     while (1)
     {
-        // int x = 0;
+        int x = 0;
 
-        // printf("\n> ");
-        // fflush(stdout); // typisk ikke nødvendigt, men ok
+        printf("\n> ");
+        fflush(stdout); // typisk ikke nødvendigt, men ok
 
         // scanf er blokkerende og venter på input
-        // if (scanf("%d", &x) == 1) 
-        // {
-        //     display_int(x);
-        //     printf("Du skrev: %d\n", x);
-        //     if((x>0) && (x<5))
-        //     {
-        //         led_toggle((int8_t)x);
-        //     }
-        //     else
-        //     {
-        //         printf("Tallet skal være mellem 1 og 4 for at toggle en LED.\n");
-        //     }
-        // } 
-        // else 
-        // {
-        //     // Hvis scanf fejler (f.eks. bogstaver), ryd input-linjen
-        //     printf("Ugyldigt input. Prøv igen.\n");
+        if (scanf("%d", &x) == 1) 
+        {
+            display_int(x);
+            printf("Du skrev: %d\n", x);
+            if((x>0) && (x<5))
+            {
+                led_toggle((int8_t)x);
+            }
+            else
+            {
+                printf("Tallet skal være mellem 1 og 4 for at toggle en LED.\n");
+            }
+        } 
+        else 
+        {
+            // Hvis scanf fejler (f.eks. bogstaver), ryd input-linjen
+            printf("Ugyldigt input. Prøv igen.\n");
             int ch;
             do 
             { 
                 ch = getchar(); 
                 putchar(ch);
             } while (ch != '\n' && ch != EOF);
-        // }
-        // uint8_t ch;
-        //     ch = uart_read_byte(UART0_ID);
-        //     if(ch != 0) // Check if a byte was read
-        //     {
-        //         putchar(ch); // Echo the received byte back to the terminal
-        //     }        
+        }
 
         _delay_ms(200);
     }

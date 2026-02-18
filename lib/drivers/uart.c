@@ -46,8 +46,14 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
 
         if(buffer_size > 0) 
         {
+            if(NULL != uart0_rx_buffer) 
+            {
+                ringbuffer_destroy(uart0_rx_buffer); // Destroy existing buffer if it exists (e.g., re-initialization)
+                uart0_rx_buffer = NULL;
+            }
             uart0_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
-            if (!uart0_rx_buffer) {
+            if (!uart0_rx_buffer) 
+            {
                 return UART_ERROR_INIT_FAILED;
             }
             UCSR0B |= (1 << RXCIE0);            // Enable RX Complete Interrupt
@@ -61,11 +67,17 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
         UCSR1A = (1 << U2X0);                   // Enable double speed
         UCSR1B = (1 << RXEN1) | (1 << TXEN1);   // Enable RX + TX
         UCSR1C = (1 << UCSZ11) | (1 << UCSZ10); // 8N1
-        
+
         if(buffer_size > 0) 
         {
+            if(NULL != uart1_rx_buffer) 
+            {
+                ringbuffer_destroy(uart1_rx_buffer); // Destroy existing buffer if it exists (e.g., re-initialization)
+                uart1_rx_buffer = NULL;
+            }
             uart1_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
-            if (!uart1_rx_buffer) {
+            if (!uart1_rx_buffer) 
+            {
                 return UART_ERROR_INIT_FAILED;
             }
             UCSR1B |= (1 << RXCIE1);            // Enable RX Complete Interrupt
@@ -79,11 +91,17 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
         UCSR2A = (1 << U2X0);                   // Enable double speed
         UCSR2B = (1 << RXEN2) | (1 << TXEN2);   // Enable RX + TX
         UCSR2C = (1 << UCSZ21) | (1 << UCSZ20); // 8N1
-        
+
         if(buffer_size > 0) 
         {
+            if(NULL != uart2_rx_buffer) 
+            {
+                ringbuffer_destroy(uart2_rx_buffer); // Destroy existing buffer if it exists (e.g., re-initialization)
+                uart2_rx_buffer = NULL;
+            }
             uart2_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
-            if (!uart2_rx_buffer) {
+            if (!uart2_rx_buffer) 
+            {
                 return UART_ERROR_INIT_FAILED;
             }
             UCSR2B |= (1 << RXCIE2);            // Enable RX Complete Interrupt
@@ -100,8 +118,14 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
         
         if(buffer_size > 0) 
         {
+            if(NULL != uart3_rx_buffer) 
+            {
+                ringbuffer_destroy(uart3_rx_buffer); // Destroy existing buffer if it exists (e.g., re-initialization)
+                uart3_rx_buffer = NULL;
+            }
             uart3_rx_buffer = ringbuffer_create(buffer_size, sizeof(uint8_t));
-            if (!uart3_rx_buffer) {
+            if (!uart3_rx_buffer) 
+            {
                 return UART_ERROR_INIT_FAILED;
             }
             UCSR3B |= (1 << RXCIE3);            // Enable RX Complete Interrupt
