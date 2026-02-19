@@ -21,10 +21,10 @@ uart_t uart_stdio_init(uint32_t baud)
 
     #ifdef UART_STDIO_RX_BUFFER_SIZE
     {
-    result = uart_init(UART0_ID, baud, UART_STDIO_RX_BUFFER_SIZE);
+    result = uart_init(UART0_ID, baud, NULL, UART_STDIO_RX_BUFFER_SIZE);
     }
     #else
-    result = uart_init(UART0_ID, baud, 0);
+    result = uart_init(UART0_ID, baud, NULL, 0);
     #endif
 
     if (UART_OK == result)

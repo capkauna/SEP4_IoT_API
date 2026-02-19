@@ -20,6 +20,10 @@ static ringbuffer_t *uart0_rx_buffer = NULL;
 static ringbuffer_t *uart1_rx_buffer = NULL;
 static ringbuffer_t *uart2_rx_buffer = NULL;
 static ringbuffer_t *uart3_rx_buffer = NULL;
+static rx_callback_t uart0_rx_callback = NULL;
+static rx_callback_t uart1_rx_callback = NULL;
+static rx_callback_t uart2_rx_callback = NULL;
+static rx_callback_t uart3_rx_callback = NULL;
 
 
 static inline uint16_t ubrr_from_baud(uint32_t baud)
@@ -28,8 +32,8 @@ static inline uint16_t ubrr_from_baud(uint32_t baud)
     return (uint16_t)((F_CPU / (8UL * baud)) - 1UL);
 }
 
-//uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, ringbuffer_t *rx_buffer)
-uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
+uart_t uart_init(uart_id_t uart_id, uint32_t baud, rx_callback_t rx_callback, uint8_t buffer_size)
+//uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
 {
     uint16_t ubrr = ubrr_from_baud(baud);
 
@@ -56,6 +60,10 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
             {
                 return UART_ERROR_INIT_FAILED;
             }
+        }
+        if((NULL != rx_callback) || (buffer_size > 0)) 
+        {
+            uart0_rx_callback = rx_callback;
             UCSR0B |= (1 << RXCIE0);            // Enable RX Complete Interrupt
         }
         break;
@@ -80,6 +88,10 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
             {
                 return UART_ERROR_INIT_FAILED;
             }
+        }
+        if((NULL != rx_callback) || (buffer_size > 0)) 
+        {
+            uart1_rx_callback = rx_callback;
             UCSR1B |= (1 << RXCIE1);            // Enable RX Complete Interrupt
         }
         break;
@@ -104,6 +116,10 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
             {
                 return UART_ERROR_INIT_FAILED;
             }
+        }
+        if((NULL != rx_callback) || (buffer_size > 0)) 
+        {
+            uart2_rx_callback = rx_callback;
             UCSR2B |= (1 << RXCIE2);            // Enable RX Complete Interrupt
         }
         break;
@@ -128,6 +144,10 @@ uart_t uart_init(uart_id_t uart_id, uint32_t baud, uint8_t buffer_size)
             {
                 return UART_ERROR_INIT_FAILED;
             }
+        }
+        if((NULL != rx_callback) || (buffer_size > 0)) 
+        {
+            uart3_rx_callback = rx_callback;
             UCSR3B |= (1 << RXCIE3);            // Enable RX Complete Interrupt
         }
         break;
@@ -237,6 +257,10 @@ ISR(USART0_RX_vect)
     uint8_t byte = UDR0;
     // Push received byte into ring buffer.
     ringbuffer_push(uart0_rx_buffer, &byte);
+    if(uart0_rx_callback != NULL) 
+    {
+        uart0_rx_callback(byte);
+    }
 }
 
 ISR(USART1_RX_vect)
@@ -244,6 +268,10 @@ ISR(USART1_RX_vect)
     uint8_t byte = UDR1;
     // Push received byte into ring buffer.
     ringbuffer_push(uart1_rx_buffer, &byte);
+    if(uart1_rx_callback != NULL) 
+    {
+        uart1_rx_callback(byte);
+    }
 }
 
 ISR(USART2_RX_vect)
@@ -251,6 +279,10 @@ ISR(USART2_RX_vect)
     uint8_t byte = UDR2;
     // Push received byte into ring buffer.
     ringbuffer_push(uart2_rx_buffer, &byte);
+    if(uart2_rx_callback != NULL) 
+    {
+        uart2_rx_callback(byte);
+    }
 }
 
 ISR(USART3_RX_vect)
@@ -258,4 +290,8 @@ ISR(USART3_RX_vect)
     uint8_t byte = UDR3;
     // Push received byte into ring buffer.
     ringbuffer_push(uart3_rx_buffer, &byte);
+    if(uart3_rx_callback != NULL) 
+    {
+        uart3_rx_callback(byte);
+    }
 }

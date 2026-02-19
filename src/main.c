@@ -48,7 +48,7 @@ int main(void)
     display_init();
 
     // Initialize UART stdio at 115200 baud. Must be same on terminal.
-    if(UART_OK != uart_stdio_init(115200))
+    if(UART_OK != uart_stdio_init(115200)) // Prøv 115200 først, hvis det ikke virker prøv 9600
     {
         led_on(4); // Tænd LED1 for at indikere fejl ved UART init
     }
