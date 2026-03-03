@@ -276,7 +276,7 @@ ISR(USART0_RX_vect)
     {
         // Push received byte into ring buffer.
         ringbuffer_push(uart0_rx_buffer, &byte);
-        if((byte == '\n') && (uart0_rx_callback != NULL)) 
+        if(((byte == '\r') || (byte == '\n')) && (uart0_rx_callback != NULL)) 
         {
             uart0_rx_callback(byte); // Call callback on receipt of '\n'
         }

@@ -10,32 +10,40 @@
 #include "display.h"
 #include "timer.h"
 #include "wifi.h"
+#include "button.h"
 
 // #include "uart.h"
 #define MAX_STRING_LENGTH 100
-#define MAX_MENU_OPTIONS 5
+#define MAX_MENU_OPTIONS 6
 
-static int led2_timer_id = 0;
+static bool _pir_active = false;
+static int x = 0;
+static char tmp_buff1[15];
+
 static char _tcp_receive_buff[MAX_STRING_LENGTH] = {0};
 static bool _tcp_string_received = false;
 static char _stdio_input_buff[MAX_STRING_LENGTH] = {0};
+
+char welcome_text[] = "Welcome from SEP4 IoT hardware!\n";
 
 uint8_t menu(void)
 {
     int choice = 0;
     puts("VIA UNIVERSITY COLLEGE SEP4 IoT Hardware DRIVERS DEMO");
     puts("\tMenu:");
-    puts("\t1. LEDs");
+    puts("\t1. Button and LED");
     puts("\t2. PIR Sensor");
     puts("\t3. Display");
     puts("\t4. WiFi");
     puts("\t5. stdio");
+    puts("\t6. Timer");
 
     printf("Choose a driver to test (1-%d): ", MAX_MENU_OPTIONS);
     stdin_flush(); // Flush any leftover '\n' input from the buffer
     do
     {
         scanf("%d", &choice);
+        printf("%d\n", choice);
         if(choice < 1 || choice > MAX_MENU_OPTIONS)
         {
             // Invalid input, clear the input buffer
@@ -50,13 +58,16 @@ uint8_t menu(void)
 
 void pir_callback(void)
 {
-    if (pir_get_state() == PIR_NO_MOTION)
+    if (_pir_active)
     {
-        led_off(1);
-    }
-    else
-    {
-        led_on(1);
+        if (pir_get_state() == PIR_NO_MOTION)
+        {
+            led_off(1);
+        }
+        else
+        {
+            led_on(1);
+        }
     }
 }
 
@@ -66,14 +77,12 @@ void led2_callback(uint8_t id)
     led_toggle(led_no);
 }
 
-void start_stop_callback(uint8_t id)
+void start_stop_timer(uint8_t id)
 {
-    led_off(3);
-
-    if (timer_get_state(led2_timer_id)) // Check if LED2 timer is active
-        timer_pause(led2_timer_id);     // Pause the LED2 timer
+    if (timer_get_state(id)) // Check if LED2 timer is active
+        timer_pause(id);     // Pause the LED2 timer
     else
-        timer_resume(led2_timer_id); // Resume the LED2 timer
+        timer_resume(id); // Resume the LED2 timer
 }
 
 void wifi_line_callback(const char *line)
@@ -86,76 +95,69 @@ void wifi_line_callback(const char *line)
     _tcp_string_received = true;
 }
 
+static bool _quit()
+{
+    return (gets_nonblocking(tmp_buff1, sizeof(tmp_buff1)) > 0 && tmp_buff1[0] == 'q');
+}
+
 int main(void)
 {
-    char welcome_text[] = "Welcome from SEP4 IoT hardware!\n";
-    char prompt_text[] = "Type text to send: ";
+    static int led2_timer_id = 0;
 
     led_init();
-    pir_init(pir_callback);
+    button_init();
     display_init();
-    wifi_init();
+    pir_init(pir_callback);
 
     // Initialize UART stdio at 115200 baud. Must be same on terminal.
-    if (UART_OK != uart_stdio_init(115200)) // Prøv 115200 først, hvis det ikke virker prøv 9600
+    if (UART_OK != uart_stdio_init(115200))
     {
-        led_on(4); // Tænd LED1 for at indikere fejl ved UART init
+        led_on(4); // Turn on LED4 to indicate error
+        while (1)
+            ;
     }
     sei(); // Enable global interrupts
 
-    // printf("UART stdio klar.\n");
-    // printf("Skriv et tal og tryk Enter.\n");
-
-    // if ((led2_timer_id = timer_create_sw(led2_callback, 100)) < 0)
-    // {
-    //     printf("Fejl ved oprettelse af LED timer!\n");
-    // }
-
-    // if (timer_create_sw(start_stop_callback, 5000) < 0)
-    // {
-    //     printf("Fejl ved oprettelse af LED timer!\n");
-    // }
-
-
     while (1)
     {
-        int x = 0;
         switch (menu())
         {
         case 1:
-            printf("Du valgte LED driveren.\n");
-            led_blink(3, 500);  // Blink LED3 with 500ms periode
-            led_blink(4, 5000); // Blink LED4 with 5000ms periode
-
-            // scanf er blokkerende og venter på input
-            if (scanf("%d", &x) == 1)
+            puts("Button and LED driver. Type 'q' to exit.");
+            puts("LED 4 vill blink. Push a button to light one of the other LEDs.");
+            led_blink(4, 500); // Blink LED4 with 5000ms periode
+            do
             {
-                display_int(x);
-                printf("Du skrev: %d\n", x);
-                if ((x > 0) && (x < 5))
-                {
-                    led_toggle((int8_t)x);
-                }
-                else
-                {
-                    printf("Tallet skal være mellem 1 og 4 for at toggle en LED.\n");
-                }
-            }
+                (button_get(1)) ? led_on(1) : led_off(1);
+                (button_get(2)) ? led_on(2) : led_off(2);
+                (button_get(3)) ? led_on(3) : led_off(3);
+                _delay_ms(200);
+            } while (!_quit());
+            led_off(4);
             break;
         case 2:
-            printf("PIR sensor driver. LED 1 should turn on when motion is detected.\n");
-            _delay_ms(10000); // Wait for 10 seconds to allow testing the PIR sensor
+            _pir_active = true;
+            puts("PIR sensor driver. Type 'q' to exit.");
+            puts("LED 1 should turn on when motion is detected.");
+            do
+            {
+                _delay_ms(200);
+            } while (!_quit());
+            _pir_active = false;
             break;
         case 3:
-            printf("Display driver. Type a number between -999 and 9999\n");
-            if (scanf("%d", &x) == 1)
+            puts("Display driver. Type 'q' to exit.");
+            puts("Type a number between -999 and 9999");
+            while (scanf("%d", &x) == 1)
             {
                 display_int(x);
                 printf("Du skrev: %d\n", x);
             }
             break;
         case 4:
-            printf("WiFi driver demo. Press Reset to exit.\n");
+            wifi_init();
+            puts("WiFi driver demo. Press Reset to exit.");
+            puts("(SSID, password, server IP and port are hardcoded, change if needed)");
             wifi_command_join_AP("Erlands SEP4", "ViaUC1234");
             wifi_command_create_TCP_connection("10.184.216.102", 23, wifi_line_callback, _tcp_receive_buff);
             wifi_command_TCP_transmit((uint8_t *)welcome_text, strlen(welcome_text));
@@ -164,13 +166,13 @@ int main(void)
             {
                 if (_tcp_string_received)
                 {
-                    printf("TCP modtaget: %s\n", _tcp_receive_buff);
+                    printf("TCP received: %s\n", _tcp_receive_buff);
                     _tcp_receive_buff[0] = '\0';
                     _tcp_string_received = false;
                 }
                 if (gets_nonblocking(_stdio_input_buff, MAX_STRING_LENGTH) > 0)
                 {
-                    printf("Du skrev: %s\n", _stdio_input_buff);
+                    printf("You wrote: %s\n", _stdio_input_buff);
                     wifi_command_TCP_transmit((uint8_t *)_stdio_input_buff, strlen(_stdio_input_buff));
                 }
                 _delay_ms(200);
@@ -186,13 +188,30 @@ int main(void)
                 putchar(ch);
             } while (ch != '\n' && ch != EOF);
             break;
+        case 6:
+            puts("Timer driver demo. Type 'q' to exit.");
+            puts("LED 2 will toggle every 100ms. Pressing button 2 will pause/resume the blinking.");
+            if ((led2_timer_id = timer_create_sw(led2_callback, 100)) < 0)
+            {
+                puts("Timer create failed");
+                _delay_ms(2000);
+                break;
+            }
+            do
+            {
+                if(button_get(2)) 
+                {
+                    start_stop_timer(led2_timer_id); // Call the start/stop callback to toggle the timer
+                    _delay_ms(300); // Debounce delay
+                }
+            } while (!_quit());
+            led_off(2);
+            timer_delete(led2_timer_id);
+            break;
         default:
             printf("Ugyldigt valg.\n");
             continue; // Gå tilbage til menuen
         }
-
-
-//        _delay_ms(200);
     }
     return 0;
 }
