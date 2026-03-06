@@ -1,6 +1,8 @@
 /***********************************************
  * led.h
- *  LED interface
+ *  LED interface. Control functions for the four LEDs on the shield.
+ *  * Note: Uses software timers (timer.c) for blinking functionality.
+ * 
  *  Author:  Erland Larsen
  *  Date:    2026-01-30
  *  Project: SPE4_API

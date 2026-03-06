@@ -1,9 +1,15 @@
-/*
- * servo_pwm.h
- *
- * Created: 07/05/2021 14:04:20
- *  Author: ERL
- */ 
+/***********************************************
+ * servo.h
+ *  Servo motor interface. Supports up to 2 channels of PWM on Timer 3.
+ *  PWM frequency is fixed at 50Hz, and duty cycle can be set to achieve
+ *  approximately +/-90 degrees of rotation.
+ * *  Note: Only PWM_A is accessable on the shield (connector marked ~5)
+ * 
+ *  Author:  Erland Larsen
+ *  Date:    2026-03-06
+ *  Project: SPE4_API
+ **********************************************/
+
 #pragma once
 
 #include <stdint.h>

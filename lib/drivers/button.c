@@ -1,10 +1,11 @@
-/*
- * keys.c
- *
- * Created: 28/01/2021 15:49:56
- * Modified: 07/04/2025 (Names of functions changed)
- *  Author: ERL
- */ 
+/***********************************************
+ * button.c
+ *  Button implementation. Functions for the three buttons on the shield.
+ * 
+ *  Author:  Erland Larsen
+ *  Date:    2026-01-30
+ *  Project: SPE4_API
+ **********************************************/
 #include <avr/io.h>
 #include <stdbool.h>
 

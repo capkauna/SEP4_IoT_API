@@ -1,3 +1,12 @@
+/***********************************************
+ * proximity.c
+ *  Proximity sensor implementation. Supports HC-SR04 ultrasonic sensor
+ *  using Timer 5 for timing the echo pulse.
+ * 
+ *  Author:  Erland Larsen
+ *  Date:    2026-03-06
+ *  Project: SPE4_API
+ **********************************************/
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>

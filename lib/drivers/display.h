@@ -1,6 +1,7 @@
 /***********************************************
  * display.h
  *  4 digit 7-segment display interface
+ * 
  *  Author:  Erland Larsen
  *  Date:    2026-01-30
  *  Project: SPE4_API

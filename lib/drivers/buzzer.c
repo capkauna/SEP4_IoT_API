@@ -1,3 +1,15 @@
+/***********************************************
+ * buzzer.c
+ *  Buzzer driver implementation
+ * 
+ *  Author:  Laurits Ivar / Erland Larsen
+ *  Date:    2024
+ *  Project: SPE4_API
+ *  Revision history: 
+ * 			 0.1 - Initial version for SEP4_DRIVERS (Laurits Ivar)
+ * 			 0.9 - 2026-03-06 Beep duration increased and integrated 
+ *                  into SPE4_API (Erland Larsen)
+ **********************************************/
 #include "buzzer.h"
 #include <avr/io.h>
 #include <util/delay.h>

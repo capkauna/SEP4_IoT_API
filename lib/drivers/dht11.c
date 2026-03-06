@@ -1,3 +1,14 @@
+/***********************************************
+ * dht11.c
+ *  DHT11 temperature and humidity sensor implementation
+ * 
+ *  Author:  Laurits Ivar / Erland Larsen
+ *  Date:    2024
+ *  Project: SPE4_API
+ *  Revision history: 
+ * 			 0.1 - Initial version (Laurits Ivar)
+ * 			 0.9 - 2026-03-06 Refactored and integrated into SPE4_API (Erland Larsen)
+ **********************************************/
 #include "dht11.h"
 #include <util/delay.h>
 #include <avr/io.h>

@@ -43,7 +43,7 @@ typedef void (*rx_callback_t)(uint8_t byte);
 //             callback:    Function to call when a byte is received. If NULL, no callback will be used 
 //                          but if buffer_size > 0 rx-interrupt is enabled and stores received bytes in
 //                          ringbuffer. If non-NULL, callback will be called with received byte as 
-//                          argument when a byte is received but only if buffer_size is 0. See table below.
+//                          argument when a byte is received. See table below.
 //                          NOTE: If using stdio, use uart_stdio_init(...) to initializes UART0 and binds it to stdio.
 //
 //                          buffer_size | callback | Behavior

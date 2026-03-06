@@ -1,3 +1,12 @@
+/***********************************************
+ * timer.c
+ *  Software timer implementation. Supports up to TIMER_MAX_TIMERS concurrent 
+ *  timers with millisecond resolution.
+ * 
+ *  Author:  Erland Larsen
+ *  Date:    2026-03-06
+ *  Project: SPE4_API
+ **********************************************/
 #include "timer.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>

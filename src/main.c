@@ -33,8 +33,7 @@ char welcome_text[] = "Welcome from SEP4 IoT hardware!\n";
 uint8_t menu(void)
 {
     int choice = 0;
-    puts("VIA UNIVERSITY COLLEGE SEP4 IoT Hardware DRIVERS DEMO");
-    puts("\tMenu:");
+    puts("\t----------------- M E N U ------------------");
     puts("\t 1. Button and LED");
     puts("\t 2. PIR Sensor (HC-SR501)");
     puts("\t 3. Display");
@@ -125,6 +124,7 @@ int main(void)
             ;
     }
     sei(); // Enable global interrupts
+    puts("VIA UNIVERSITY COLLEGE SEP4 IoT Hardware DRIVERS DEMO");
 
     while (1)
     {

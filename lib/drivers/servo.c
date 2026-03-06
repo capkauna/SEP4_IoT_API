@@ -1,12 +1,20 @@
-/*
- * servo_pwm.c
- *
- * Created: 03-03-2026
- *  Author: ERL
- */ 
+/***********************************************
+ * servo.c
+ *  Servo motor implementation. Supports up to 2 channels of PWM on Timer 3.
+ *  PWM frequency is fixed at 50Hz, and duty cycle can be set to achieve
+ *  approximately +/-90 degrees of rotation.
+ * *  Note: Only PWM_A is accessable on the shield (connector marked ~5)
+ * 
+ *  Author:  Erland Larsen
+ *  Date:    2026-03-06
+ *  Project: SPE4_API
+ **********************************************/
+
 #include <avr/io.h>
 #include "servo.h"
 
+// Hardware abstraction for Timer 3 and its associated pins. 
+// This allows for easier porting to other timers or microcontrollers by just changing
 #define DDRx   DDRE
 #define CHANNEL_A PE3
 #define CHANNEL_B PE4
