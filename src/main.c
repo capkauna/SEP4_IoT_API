@@ -1,4 +1,3 @@
-// #define F_CPU 16000000UL
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
@@ -15,10 +14,13 @@
 #include "dht11.h"
 #include "proximity.h"
 #include "servo.h"
+#include "adc.h"
+#include "light.h"
+#include "soil.h"
 
 // #include "uart.h"
 #define MAX_STRING_LENGTH 100
-#define MAX_MENU_OPTIONS 10
+#define MAX_MENU_OPTIONS 12
 
 static bool _pir_active = false;
 static int x = 0;
@@ -44,9 +46,10 @@ uint8_t menu(void)
     puts("\t 8. Temperature and humiduty sensor (DHT11)");
     puts("\t 9. Proximity sensor (HC-SR04)");
     puts("\t10. Servo motor (SG90)");
+    puts("\t11. Light sensor (KY-018)");
+    puts("\t12. Soil Moisture Sensor ( capacitive )");
 
     printf("Choose a driver to test (1-%d): ", MAX_MENU_OPTIONS);
-    stdin_flush(); // Flush any leftover '\n' input from the buffer
     do
     {
         scanf("%d", &choice);
@@ -61,6 +64,11 @@ uint8_t menu(void)
     } while (choice < 1 || choice > MAX_MENU_OPTIONS);
 
     return (uint8_t)choice;
+}
+
+static bool _quit()
+{
+    return (gets_nonblocking(tmp_buff1, sizeof(tmp_buff1)) > 0 && tmp_buff1[0] == 'q');
 }
 
 void pir_callback(void)
@@ -100,11 +108,6 @@ void wifi_line_callback(const char *line)
     _tcp_receive_buff[_index + 1] = '\n';
     _tcp_receive_buff[_index + 2] = '\0';
     _tcp_string_received = true;
-}
-
-static bool _quit()
-{
-    return (gets_nonblocking(tmp_buff1, sizeof(tmp_buff1)) > 0 && tmp_buff1[0] == 'q');
 }
 
 int main(void)
@@ -161,6 +164,7 @@ int main(void)
                 display_int(x);
                 printf("Du skrev: %d\n", x);
             }
+            scanf("%*s"); // Clear invalid input from buffer
             break;
         case 4:
             wifi_init();
@@ -283,6 +287,51 @@ int main(void)
                 }
             }
             servo_stop();
+            scanf("%*s"); // Clear invalid input from buffer
+            break;
+        case 11:
+            puts("Light sensor driver demo. Type 'q' to exit.");
+            puts("Light level will be printed every 2 seconds.");
+            if(light_init() != ADC_OK)
+            {
+                printf("Failed to initialize light sensor.\n");
+                break;
+            }
+            do
+            {
+                uint16_t light_level = light_read_raw();
+                if (light_level == UINT16_MAX)
+                {
+                    printf("Failed to read from light sensor. Make sure it is initialized correctly.\n");
+                }
+                else
+                {
+                    printf("Light level: %d (0-1023)\n", light_level);
+                }
+                _delay_ms(2000); // Wait 2 seconds before next reading
+            } while (!_quit());
+            break;
+        case 12:
+            puts("Soil moisture sensor driver demo. Type 'q' to exit.");
+            puts("Soil moisture level will be measured on PK0 every 2 seconds.");
+            if(soil_init(ADC_PK0) != ADC_OK)
+            {
+                printf("Failed to initialize soil moisture sensor on ADC_PK0.\n");
+                break;
+            }
+            do
+            {
+                uint16_t soil_moisture = soil_read_raw(ADC_PK0);
+                if (soil_moisture == UINT16_MAX)
+                {
+                    printf("Failed to read from soil moisture sensor. Make sure it is connected and initialized correctly.\n");
+                }
+                else
+                {
+                    printf("Soil moisture level: %d (0-1023)\n", soil_moisture);
+                }
+                _delay_ms(2000); // Wait 2 seconds before next reading
+            } while (!_quit());
             break;
         default:
             printf("Error: Invalid selection.\n");
