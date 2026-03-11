@@ -219,7 +219,6 @@ int main(void)
         {
             int ch;
             printf("stdio driver. Type a text to echo to the terminal.\n");
-//            stdin_flush(); // Flush any leftover input from the buffer
             while(getchar() != '\n') // Clear newline left in buffer from previous input
                 ;
             do

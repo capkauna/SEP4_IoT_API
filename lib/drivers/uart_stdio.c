@@ -64,14 +64,6 @@ uint8_t gets_nonblocking(char *buffer, uint8_t max_length)
     return index; // Return number of characters read
 }
 
-void stdin_flush()
-{
-    uint8_t dummy;
-    while (uart_read_byte(UART0_ID, &dummy) == UART_OK) {
-        // Discard all bytes in the buffer
-    }
-}
-
 static int uart0_putchar(char c, FILE *stream)
 {
     (void)stream;
