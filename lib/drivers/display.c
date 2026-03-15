@@ -49,7 +49,8 @@ const static int8_t hex_digits[] = {
     0b00000000  // (Empty space)
 };
 
-int8_t static display_data[] = {0x3, 0x3, 0x3, 0x3};
+static int8_t display_data[] = {0x3, 0x3, 0x3, 0x3};
+static uint8_t comma_position = 0;
 
 void display_setValues(int8_t seg1, int8_t seg2, int8_t seg3, int8_t seg4)
 {
@@ -107,6 +108,15 @@ void display_int(int16_t value)
         }
 }
 
+void display_setDecimals(uint8_t value)
+{
+    if (value > 3)
+    {
+        return; // Ignore invalid comma positions
+    }
+    comma_position = value;
+}
+
 void shift_out(int8_t data);
 void pulse_latch();
 
@@ -138,7 +148,14 @@ ISR(TIMER1_COMPA_vect)
 {
     int8_t static current_digit = 0;
     LATCH_PORT &= ~(1 << LATCH_BIT);
-    shift_out(~hex_digits[display_data[current_digit]]);
+    if((comma_position > 0) && (current_digit == (3-comma_position)))
+    {
+        shift_out(~(hex_digits[display_data[current_digit]] | (1 << 7)));
+    }
+    else
+    {
+        shift_out(~(hex_digits[display_data[current_digit]]));
+    }
     shift_out(1 << current_digit);
     LATCH_PORT |= (1 << LATCH_BIT);
     // pulse_latch();

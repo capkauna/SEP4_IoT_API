@@ -47,6 +47,10 @@ ADC_Error_t adc_create(ADC_Channel_t channel, ADC_Reference_t reference)
 
         // Enable channels ADC8-ADC15 (PK0-PK7) by setting MUX5 bit in ADCSRB
         ADCSRB |= (1 << MUX5);
+
+        // Disable digital input buffers on ADC pins to reduce power consumption
+        DIDR2 |= (1 << channel);
+        
         adc_hw_initialized = true;
     }
 

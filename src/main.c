@@ -17,10 +17,11 @@
 #include "adc.h"
 #include "light.h"
 #include "soil.h"
+#include "tone.h"
 
 // #include "uart.h"
 #define MAX_STRING_LENGTH 100
-#define MAX_MENU_OPTIONS 12
+#define MAX_MENU_OPTIONS 13
 
 static bool _pir_active = false;
 static int x = 0;
@@ -49,6 +50,7 @@ uint8_t menu(void)
     printf("\t10. Servo motor (SG90)\n");
     printf("\t11. Light sensor (KY-018)\n");
     printf("\t12. Soil Moisture Sensor ( capacitive )\n");
+    printf("\t13. Play Star Wars theme on the speaker\n");
 
     printf("Choose a driver to test (1-%d): ", MAX_MENU_OPTIONS);
     do
@@ -161,6 +163,7 @@ int main(void)
             printf("Type a number between -999 and 9999\n");
             while (scanf("%d", &x) == 1)
             {
+                display_setDecimals(1); // Set comma before least significant digit for demonstration
                 display_int(x);
                 printf("Du skrev: %d\n", x);
             }
@@ -362,6 +365,11 @@ int main(void)
                 }
                 _delay_ms(2000); // Wait 2 seconds before next reading
             } while (!_quit());
+            break;
+        case 13:
+            printf("Playing Star Wars theme on the speaker. Press Reset to exit.\n");
+            tone_init();
+            tone_play_starwars();
             break;
         default:
             printf("Error: Invalid selection.\n");
