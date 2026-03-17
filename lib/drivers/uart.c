@@ -16,10 +16,10 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-static ringbuffer_t *uart0_rx_buffer = NULL;
-static ringbuffer_t *uart1_rx_buffer = NULL;
-static ringbuffer_t *uart2_rx_buffer = NULL;
-static ringbuffer_t *uart3_rx_buffer = NULL;
+static ringbuffer_t uart0_rx_buffer = NULL;
+static ringbuffer_t uart1_rx_buffer = NULL;
+static ringbuffer_t uart2_rx_buffer = NULL;
+static ringbuffer_t uart3_rx_buffer = NULL;
 static rx_callback_t uart0_rx_callback = NULL;
 static rx_callback_t uart1_rx_callback = NULL;
 static rx_callback_t uart2_rx_callback = NULL;

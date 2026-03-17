@@ -2,7 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void advance_pointer(ringbuffer_t *rb)
+typedef struct ringbuffer_s{
+    void   *buffer;
+    size_t  capacity;
+    size_t  elem_size;
+    size_t  head;
+    size_t  tail;
+    bool    full;
+} ringbuffer_s;
+
+static void advance_pointer(ringbuffer_t rb)
 {
     if (rb->full) {
         rb->tail = (rb->tail + 1) % rb->capacity;
@@ -12,18 +21,18 @@ static void advance_pointer(ringbuffer_t *rb)
     rb->full = (rb->head == rb->tail);
 }
 
-static void retreat_pointer(ringbuffer_t *rb)
+static void retreat_pointer(ringbuffer_t rb)
 {
     rb->full = false;
     rb->tail = (rb->tail + 1) % rb->capacity;
 }
 
-ringbuffer_t *ringbuffer_create(size_t capacity, size_t elem_size)
+ringbuffer_t ringbuffer_create(size_t capacity, size_t elem_size)
 {
     if (capacity == 0 || elem_size == 0)
         return NULL;
 
-    ringbuffer_t *rb = malloc(sizeof(ringbuffer_t));
+    ringbuffer_t rb = malloc(sizeof(ringbuffer_s));
     if (!rb)
         return NULL;
 
@@ -42,7 +51,7 @@ ringbuffer_t *ringbuffer_create(size_t capacity, size_t elem_size)
     return rb;
 }
 
-void ringbuffer_destroy(ringbuffer_t *rb)
+void ringbuffer_destroy(ringbuffer_t rb)
 {
     if (!rb) return;
 
@@ -50,7 +59,7 @@ void ringbuffer_destroy(ringbuffer_t *rb)
     free(rb);
 }
 
-bool ringbuffer_push(ringbuffer_t *rb, const void *item)
+bool ringbuffer_push(ringbuffer_t rb, const void *item)
 {
     if (!rb || !item)
         return false;
@@ -63,7 +72,7 @@ bool ringbuffer_push(ringbuffer_t *rb, const void *item)
     return true;
 }
 
-bool ringbuffer_pop(ringbuffer_t *rb, void *item)
+bool ringbuffer_pop(ringbuffer_t rb, void *item)
 {
     if (!rb || !item || ringbuffer_is_empty(rb))
         return false;
@@ -76,17 +85,17 @@ bool ringbuffer_pop(ringbuffer_t *rb, void *item)
     return true;
 }
 
-bool ringbuffer_is_empty(const ringbuffer_t *rb)
+bool ringbuffer_is_empty(const ringbuffer_t rb)
 {
     return (!rb->full && (rb->head == rb->tail));
 }
 
-bool ringbuffer_is_full(const ringbuffer_t *rb)
+bool ringbuffer_is_full(const ringbuffer_t rb)
 {
     return rb->full;
 }
 
-size_t ringbuffer_size(const ringbuffer_t *rb)
+size_t ringbuffer_size(const ringbuffer_t rb)
 {
     if (rb->full)
         return rb->capacity;
